@@ -19,8 +19,8 @@ const Actor = function() {
   this.commands = {
     '/start': 'emitStart',
     '/advice': 'emitAdvice',
-    '/subscribe': 'emitSubscribe',
-    '/unsubscribe': 'emitUnSubscribe',
+    // '/subscribe': 'emitSubscribe',
+    // '/unsubscribe': 'emitUnSubscribe',
     '/price': 'emitPrice',
     '/help': 'emitHelp'
   };
@@ -29,7 +29,7 @@ const Actor = function() {
   }
   this.rawCommands = _.keys(this.commands);
   this.chatId = null;
-  this.subscribers = [];
+  this.subscribers = telegrambot.subscribers;
   this.bot = new telegram(telegrambot.token, { polling: true });
   this.bot.onText(/(.+)/, this.verifyQuestion);
 };
@@ -40,6 +40,13 @@ Actor.prototype.processCandle = function(candle, done) {
 
   done();
 };
+
+Actor.prototype.broadcast = function(chatId, message){
+  const foundChatId = this.subscribers.find(subscriber => subscriber === chatId);
+  if (foundChatId) {
+    this.bot.sendMessage(foundChatId, message)
+  }
+}
 
 Actor.prototype.processAdvice = function(advice) {
   if (advice.recommendation === 'soft') return;
@@ -54,24 +61,24 @@ if(emitTrades) {
     var message = 'Trade initiated. ID: ' + tradeInitiated.id +
     '\nAction: ' + tradeInitiated.action + '\nPortfolio: ' +
     tradeInitiated.portfolio + '\nBalance: ' + tradeInitiated.balance;
-    this.bot.sendMessage(this.chatId, message);
+    this.broadcast(this.chatId, message);
   }
   
   Actor.prototype.processTradeCancelled = function (tradeCancelled) {
     var message = 'Trade cancelled. ID: ' + tradeCancelled.id;
-    this.bot.sendMessage(this.chatId, message);
+    this.broadcast(this.chatId, message);
   }
   
   Actor.prototype.processTradeAborted = function (tradeAborted) {
     var message = 'Trade aborted. ID: ' + tradeAborted.id +
     '\nNot creating order! Reason: ' + tradeAborted.reason;
-    this.bot.sendMessage(this.chatId, message);
+    this.broadcast(this.chatId, message);
   }
   
   Actor.prototype.processTradeErrored = function (tradeErrored) {
     var message = 'Trade errored. ID: ' + tradeErrored.id +
     '\nReason: ' + tradeErrored.reason;
-    this.bot.sendMessage(this.chatId, message);
+    this.broadcast(this.chatId, message);
   }
   
   Actor.prototype.processTradeCompleted = function (tradeCompleted) {
@@ -84,7 +91,7 @@ if(emitTrades) {
     '\nBalance: ' + tradeCompleted.balance +
     '\nFee percent: ' + tradeCompleted.feePercent +
     '\nEffective price: ' + tradeCompleted.effectivePrice;
-    this.bot.sendMessage(this.chatId, message); 
+    this.broadcast(this.chatId, message); 
   }
 }
 
@@ -101,23 +108,23 @@ Actor.prototype.emitStart = function() {
   this.bot.sendMessage(this.chatId, 'Hello! How can I help you?');
 };
 
-Actor.prototype.emitSubscribe = function() {
-  if (this.subscribers.indexOf(this.chatId) === -1) {
-    this.subscribers.push(this.chatId);
-    this.bot.sendMessage(this.chatId, `Success! Got ${this.subscribers.length} subscribers.`);
-  } else {
-    this.bot.sendMessage(this.chatId, "You are already subscribed.");
-  }
-};
+// Actor.prototype.emitSubscribe = function() {
+//   if (this.subscribers.indexOf(this.chatId) === -1) {
+//     this.subscribers.push(this.chatId);
+//     this.bot.sendMessage(this.chatId, `Success! Got ${this.subscribers.length} subscribers.`);
+//   } else {
+//     this.bot.sendMessage(this.chatId, "You are already subscribed.");
+//   }
+// };
 
-Actor.prototype.emitUnSubscribe = function() {
-  if (this.subscribers.indexOf(this.chatId) > -1) {
-    this.subscribers.splice(this.subscribers.indexOf(this.chatId), 1);
-    this.bot.sendMessage(this.chatId, "Success!");
-  } else {
-    this.bot.sendMessage(this.chatId, "You are not subscribed.");
-  }
-};
+// Actor.prototype.emitUnSubscribe = function() {
+//   if (this.subscribers.indexOf(this.chatId) > -1) {
+//     this.subscribers.splice(this.subscribers.indexOf(this.chatId), 1);
+//     this.bot.sendMessage(this.chatId, "Success!");
+//   } else {
+//     this.bot.sendMessage(this.chatId, "You are not subscribed.");
+//   }
+// };
 
 Actor.prototype.emitAdvice = function(chatId) {
   let message = [

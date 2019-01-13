@@ -22,6 +22,8 @@
 
 var start = (mode, config) => {
   var util = require(__dirname + '/../../util');
+  const defaultConfig = require(__dirname + '/../../../config');
+  
 
   // force correct gekko env
   util.setGekkoEnv('child-process');
@@ -31,6 +33,15 @@ var start = (mode, config) => {
   // force correct gekko mode & config
   util.setGekkoMode(mode);
   util.setConfig(config);
+  if (config.type &&
+      //config.type === 'tradebot' &&
+      config.type === 'paper trader' && 
+      defaultConfig.telegrambot &&
+      defaultConfig.telegrambot.enabled
+      ) {
+    config.telegrambot = defaultConfig.telegrambot
+  }
+  
 
   var pipeline = require(dirs.core + 'pipeline');
   pipeline({
