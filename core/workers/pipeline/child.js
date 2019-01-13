@@ -34,8 +34,7 @@ var start = (mode, config) => {
   util.setGekkoMode(mode);
   util.setConfig(config);
   if (config.type &&
-      config.type === 'tradebot' &&
-      //config.type === 'paper trader' && 
+      (config.type === 'tradebot' || config.type === 'paper trader') &&
       defaultConfig.telegrambot &&
       defaultConfig.telegrambot.enabled
       ) {
