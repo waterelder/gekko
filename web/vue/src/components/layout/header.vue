@@ -1,9 +1,6 @@
 <template lang='pug'>
   div
     #top
-    header.bg--off-white.grd
-      .contain.grd-row
-        h3.py1.px2.col-2 Gekko UI
     nav.bg--light-gray
       .menu.contain
         router-link(to='/home').py1 Home

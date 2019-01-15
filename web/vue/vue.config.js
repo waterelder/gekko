@@ -2,6 +2,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   configureWebpack: {
+    cache: true,
     plugins: [
       new CopyWebpackPlugin([
         {
